@@ -34,15 +34,22 @@
 <script src="/bootstrap/js/bootstrap.js"></script>
 <script>
     function shutDown () {
-        if (confirm("Shut down?")) {
-            var shutdownReason = new Object();
-
-            shutdownReason.reason = "shutdown from the site";
-
-            var data = JSON.stringify(shutdownReason);
-            $.post("/servlets/shutdown", data);
-        }
+        if (confirm("Shut down?"))
+            sendShutdown();
     }
+
+    function sendShutdown () {
+        var mirandaHost = sessionStorage.getItem ('miranda');
+        var url = "https://" + mirandaHost + "/servlets/shutdown";
+
+        $.ajax ({
+            url : url,
+            method : 'POST',
+            data : json,
+            headers : { "Access-Control-Allow-Origin" : mirandaHost }
+        });
+    }
+
 </script>
 </body>
 </html>
