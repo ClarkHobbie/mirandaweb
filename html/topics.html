@@ -308,8 +308,18 @@
         deleteRequest.sessionIdString = $('#session').text();
         deleteRequest.topic = topic;
 
-        var data = JSON.stringify(deleteRequest);
-        $.post("/servlets/deleteTopic", data, deleteResult);
+        var json = JSON.stringify(deleteRequest);
+
+        var mirandaHost = sessionStorage.getItem ('miranda');
+        var url = "https://" + mirandaHost + "/servlets/updateTopic";
+
+        $.ajax ({
+            url : url,
+            success : deleteResult,
+            method : 'POST',
+            data : json,
+            headers : { "Access-Control-Allow-Origin" : mirandaHost }
+        });
     }
 
     function deleteResult (data, status) {

@@ -111,7 +111,16 @@
 
         var json = JSON.stringify(getSubscriptionsRequest);
 
-        $.post("/servlets/getSubscriptions", json, gotTableContents);
+        var mirandaHost = sessionStorage.getItem ('miranda');
+        var url = "https://" + mirandaHost + "/servlets/getSubscriptions";
+
+        $.ajax ({
+            url : url,
+            success : gotTableContents,
+            method : 'POST',
+            data : json,
+            headers : { "Access-Control-Allow-Origin" : mirandaHost }
+        });
     }
 
     function gotTableContents (data, status) {
@@ -153,7 +162,17 @@
         getSubscriptionRequest.subscription = subscription;
 
         var json = JSON.stringify(getSubscriptionRequest);
-        $.post("/servlets/getSubscription", json, getSubscriptionResult);
+
+        var mirandaHost = sessionStorage.getItem ('miranda');
+        var url = "https://" + mirandaHost + "/servlets/getSubscription";
+
+        $.ajax ({
+            url : url,
+            success : getSubscriptionResult,
+            method : 'POST',
+            data : json,
+            headers : { "Access-Control-Allow-Origin" : mirandaHost }
+        });
     }
 
     function deleteSubscription () {
@@ -172,7 +191,16 @@
 
          var json = JSON.stringify(deleteRequest);
 
-         $.post("/servlets/deleteSubscription", json, sendDeleteResponse);
+         var mirandaHost = sessionStorage.getItem ('miranda');
+         var url = "https://" + mirandaHost + "/servlets/deleteSubscription";
+
+         $.ajax ({
+             url : url,
+             success : sendDeleteResponse,
+             method : 'POST',
+             data : json,
+             headers : { "Access-Control-Allow-Origin" : mirandaHost }
+         });
     }
 
     function sendDeleteResponse (data, status) {
@@ -316,7 +344,17 @@
         createSubscriptionRequest.subscription = subscription;
 
         var json = JSON.stringify(createSubscriptionRequest);
-        $.post("/servlets/createSubscription", json, createResult);
+
+        var mirandaHost = sessionStorage.getItem ('miranda');
+        var url = "https://" + mirandaHost + "/servlets/createSubscription";
+
+        $.ajax ({
+            url : url,
+            success : createResult,
+            method : 'POST',
+            data : json,
+            headers : { "Access-Control-Allow-Origin" : mirandaHost }
+        });
     }
 
     function createResult (data, status) {
