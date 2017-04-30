@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Miranda Properties Page</title>
+
+</head>
+
+<body ng-app="mainApp">
+
+    <form name="properties" id="properties" action="/servlets/setProperty" method="post">
+    <div class="container" >
+	    <table ng-controller="propertiesController">
+		    <tr>
+			    <th>Name</th>
+			    <th>Value</th>
+			    <th>Change</th>
+		    </tr>
+		    <tr ng-repeat="property in properties | orderBy: name">
+			    <td>{{ property.name }}</td>
+			    <td><input id="name" name="{{ property.name }}" value="{{ property.value }}"/></td>
+			    <td><button type="button" ng-click='writeProperty(property.name)'>Change</button></td>
+		    </tr>
+
+	    </table>
+    </div>
+    </form>
+<script src = "angular.js"></script>
+<script type="text/javascript">
+
+var app = angular.module('mainApp', []);
+app.controller('propertiesController', function($scope, $http) {
+	var url = "/servlets/properties";
+	var urlWrite = "/servlets/writePrperty";
+
+	$scope.writeProperty = function (name) {
+		document.getElementById("properties").submit();
+	}
+
+	$http.get(url)
+	.then(function(response) {
+		$scope.properties = response.data;
+	});
+});
+
+</script>
+</body>
+
+</html>
+
