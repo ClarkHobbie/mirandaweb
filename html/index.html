@@ -42,6 +42,11 @@
         var mirandaHost = sessionStorage.getItem ('miranda');
         var url = "https://" + mirandaHost + "/servlets/shutdown";
 
+        var requestObject = new Object();
+        requestObject.sessionIdString = sessionStorage.getItem ('session');
+
+        var json = JSON.stringify(requestObject);
+
         $.ajax ({
             url : url,
             method : 'POST',

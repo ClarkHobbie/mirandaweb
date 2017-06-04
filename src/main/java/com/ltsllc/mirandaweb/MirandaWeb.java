@@ -8,6 +8,7 @@ import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Properties;
 
 /**
@@ -56,20 +57,37 @@ public class MirandaWeb {
         this.properties = new MirandaWebProperties();
     }
 
-    public void setupProperties () {
+    public void setupProperties () throws IOException {
+        MirandaWebProperties mirandaWebProperties = new MirandaWebProperties(getPropertiesFileName());
+        Properties p = mirandaWebProperties.getProperties();
+
         Properties properties = PropertiesUtils.copy(System.getProperties());
-        PropertiesUtils.overwrite(properties, getProperties().asProperties());
+        PropertiesUtils.overwrite(p, properties);
 
         Properties env = PropertiesUtils.mapToProperties(System.getenv());
-        PropertiesUtils.overwrite(properties, env);
+        PropertiesUtils.overwrite(p, env);
 
-        PropertiesUtils.overwrite(properties, getCommandLine().asProperties());
+        PropertiesUtils.overwrite(p, getCommandLine().asProperties());
 
-        getProperties().setProperties(properties);
+        getProperties().setProperties(p);
     }
+
+
+    public void checkFile (String filename) {
+        File file = new File(filename);
+        if (!file.exists()) {
+            throw new ShutdownException ("truststore, " + filename + ", does not exist");
+        }
+    }
+
+    public static final String TRUST_STORE_PROPERTY = "javax.net.ssl.trustStore";
 
     public void start () throws Exception {
         setupProperties();
+
+        String filename = getProperties().getProperty(MirandaWebProperties.PROPERTY_TRUST_STORE_FILENAME);
+        checkFile(filename);
+        System.setProperty(TRUST_STORE_PROPERTY, filename);
         Server server = buildJetty();
         server.start();
     }
@@ -86,7 +104,7 @@ public class MirandaWeb {
         //
         // jetty wants some properties defined
         //
-        File file = new File(getProperties().getProperty(MirandaWebProperties.PROPERTY_BASE));
+        File file = new File(getProperties().getProperty(MirandaWebProperties.PROPERTY_HTML_BASE));
         String base = file.getCanonicalPath();
 
         getProperties().setProperty(JETTY_BASE, base);
@@ -97,8 +115,10 @@ public class MirandaWeb {
         Server jetty = new Server();
 
         ResourceHandler resourceHandler = new ResourceHandler();
+
         resourceHandler.setDirectoriesListed(true);
         resourceHandler.setWelcomeFiles(new String[]{ "index.html" });
+
         resourceHandler.setResourceBase(base);
 
         HandlerCollection handlerCollection = new HandlerCollection();
@@ -130,5 +150,9 @@ public class MirandaWeb {
         jetty.setConnectors(new Connector[] { sslConnector });
 
         return jetty;
+    }
+
+    public String getPropertiesFileName () {
+        return "mirandaweb.properties";
     }
 }

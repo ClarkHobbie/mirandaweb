@@ -23,10 +23,22 @@ public class MirandaWebCommandLine extends CommandLine {
     public static final String PORT_SHORT = "-r";
     public static final String PORT_LONG = "--port";
 
+    public static final String PROPERTIES_FILE_SHORT = "-t";
+    public static final String PROPERTIES_FILE_LONG = "--properties";
+
     private String base;
     private String keystore;
     private String password;
     private int port;
+    private String propertiesFile;
+
+    public String getPropertiesFile() {
+        return propertiesFile;
+    }
+
+    public void setPropertiesFile(String propertiesFile) {
+        this.propertiesFile = propertiesFile;
+    }
 
     public int getPort() {
         return port;
@@ -69,6 +81,7 @@ public class MirandaWebCommandLine extends CommandLine {
         setBase(MirandaWebProperties.DEFAULT_BASE);
         setKeystore(MirandaWebProperties.DEFAULT_KEYSTORE);
         setPort(MirandaWebProperties.DEFAULT_PORT);
+        setPropertiesFile(MirandaWebProperties.DEFAULT_PROPERTIES_FILE);
     }
 
     public void setBase() {
@@ -112,6 +125,16 @@ public class MirandaWebCommandLine extends CommandLine {
         setPort(getArgAndAdvance());
     }
 
+    public void setPropertiesFile () {
+        if (null == getArg()) {
+            System.err.println("missing properties file argument");
+            System.err.println(USAGE);
+            return;
+        }
+
+        setPropertiesFile(getArgAndAdvance());
+    }
+
     public void parse() {
         while (null != getArg()) {
             if (getArg().equals(BASE_SHORT) || getArg().equals(BASE_LONG)) {
@@ -126,6 +149,9 @@ public class MirandaWebCommandLine extends CommandLine {
             } else if (getArg().equals(PORT_SHORT) || (getArg().equals(PORT_LONG))) {
                 advance();
                 setPort();
+            } else if (getArg().equals(PROPERTIES_FILE_SHORT) || (getArg().equals(PROPERTIES_FILE_LONG))) {
+                advance();
+                setPropertiesFile();
             }
         }
     }
@@ -140,6 +166,8 @@ public class MirandaWebCommandLine extends CommandLine {
         String temp = getPassword();
         if (null != temp)
             properties.setProperty(MirandaWebProperties.PROPERTY_PASSWORD, temp);
+
+        properties.setProperty(MirandaWebProperties.PROPERTY_PROPERTIES_FILE, getPropertiesFile());
 
         return properties;
     }
