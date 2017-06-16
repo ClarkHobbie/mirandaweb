@@ -2,6 +2,7 @@ package com.ltsllc.mirandaweb;
 
 import com.ltsllc.mirandaweb.property.UndefinedPropertyException;
 import com.ltsllc.mirandaweb.util.PropertiesUtils;
+import com.ltsllc.mirandaweb.util.Utils;
 import org.eclipse.jetty.server.*;
 import org.eclipse.jetty.server.handler.HandlerCollection;
 import org.eclipse.jetty.server.handler.ResourceHandler;
@@ -9,7 +10,10 @@ import org.eclipse.jetty.util.ssl.SslContextFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.security.GeneralSecurityException;
+import java.security.KeyStore;
 import java.util.Properties;
+import java.util.Scanner;
 
 /**
  * Created by Clark on 4/30/2017.
@@ -23,6 +27,24 @@ public class MirandaWeb {
     private MirandaWebCommandLine commandLine;
     private Server server;
     private MirandaWebProperties properties;
+    private String keyStorePassword;
+    private String trustStorePasswod;
+
+    public String getKeyStorePassword() {
+        return keyStorePassword;
+    }
+
+    public void setKeyStorePassword(String keyStorePassword) {
+        this.keyStorePassword = keyStorePassword;
+    }
+
+    public String getTrustStorePassword() {
+        return trustStorePasswod;
+    }
+
+    public void setTrustStorePasswod(String trustStorePasswod) {
+        this.trustStorePasswod = trustStorePasswod;
+    }
 
     public Server getServer() {
         return server;
@@ -83,15 +105,34 @@ public class MirandaWeb {
     public static final String TRUST_STORE_PROPERTY = "javax.net.ssl.trustStore";
 
     public void start () throws Exception {
+        setupPasswords();
         setupProperties();
 
-        String filename = getProperties().getProperty(MirandaWebProperties.PROPERTY_TRUST_STORE_FILENAME);
-        checkFile(filename);
-        System.setProperty(TRUST_STORE_PROPERTY, filename);
         Server server = buildJetty();
         server.start();
     }
 
+
+    /**
+     * Ensure that we have the necessary key store and trust store passwords.
+     */
+    public void setupPasswords () {
+        Scanner scanner = new Scanner(System.in);
+
+        if (null != getCommandLine().getKeyStorePassword())
+            setKeyStorePassword(getCommandLine().getKeyStorePassword());
+        else {
+            System.out.print("Keystore password:");
+            setKeyStorePassword(scanner.nextLine());
+        }
+
+        if (null != getCommandLine().getTrustStorePassword())
+            setTrustStorePasswod(getCommandLine().getTrustStorePassword());
+        else {
+            System.out.print("Truststore password:");
+            setTrustStorePasswod(scanner.nextLine());
+        }
+    }
 
     public void checkProperty (String name, String value) throws UndefinedPropertyException {
         if (null == value || value.equals("")) {
@@ -126,21 +167,19 @@ public class MirandaWeb {
 
         jetty.setHandler(handlerCollection);
 
-        String serverKeyStoreFilename = getProperties().getProperty(MirandaWebProperties.PROPERTY_KEYSTORE);
-        checkProperty(MirandaWebProperties.PROPERTY_KEYSTORE, serverKeyStoreFilename);
-
-        String serverKeyStorePassword = getProperties().getProperty(MirandaWebProperties.PROPERTY_PASSWORD);
-        checkProperty(MirandaWebProperties.PROPERTY_PASSWORD, serverKeyStorePassword);
+        String keyStoreFilename = getProperties().getProperty(MirandaWebProperties.PROPERTY_KEYSTORE_FILENAME);
+        System.out.println("Using " + keyStoreFilename + " as the keystore");
 
         HttpConfiguration https = new HttpConfiguration();
         https.addCustomizer(new SecureRequestCustomizer());
 
         SslContextFactory sslContextFactory = new SslContextFactory();
-        sslContextFactory.setKeyStorePath(serverKeyStoreFilename);
-        sslContextFactory.setKeyStorePassword(serverKeyStorePassword);
-        sslContextFactory.setKeyManagerPassword(serverKeyStorePassword);
+        sslContextFactory.setKeyStorePath(keyStoreFilename);
+        sslContextFactory.setKeyStorePassword(getKeyStorePassword());
+        sslContextFactory.setKeyManagerPassword(getKeyStorePassword());
 
         int sslPort = getProperties().getIntegerProperty(MirandaWebProperties.PROPERTY_PORT);
+        System.out.println("Using " + sslPort + " as the port");
 
         ServerConnector sslConnector = new ServerConnector(jetty,
                 new SslConnectionFactory(sslContextFactory, "http/1.1"),

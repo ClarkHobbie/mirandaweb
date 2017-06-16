@@ -120,7 +120,7 @@
         getUsersRequestObject.sessionIdString = $('#session').val();
         var json = JSON.stringify (getUsersRequestObject);
         var mirandaHost = sessionStorage.getItem('miranda');
-        var url = "https://" + mirandaHost + "/servlets/getUsers";
+        var url = "https://" + mirandaHost + "/user/list";
 
         $.ajax ({
             url : url,
@@ -204,14 +204,14 @@
         var data = JSON.stringify(request);
 
         var mirandaHost = sessionStorage.getItem('miranda');
-        var url = "https://" + mirandaHost + "/servlets/createUser";
+        var url = "https://" + mirandaHost + "/users/create";
 
         $.post(url, data, createUserResults);
     }
 
     function createKeyPair () {
         var mirandaHost = sessionStorage.getItem('miranda');
-        var url = "https://" + mirandaHost + "/servlets/createKeyPair";
+        var url = "https://" + mirandaHost + "/key/createKeyPair";
 
         $.get(url, gotKeyPair);
     }
@@ -258,7 +258,7 @@
         var  json = JSON.stringify(request);
 
         var mirandaHost = sessionStorage.getItem('miranda');
-        var url = "https://" + mirandaHost + "/servlets/getUser";
+        var url = "https://" + mirandaHost + "/user/read";
 
         $.post(url, json, commenceEdit);
     }
@@ -320,7 +320,7 @@
         var json = JSON.stringify(updateUserRequest);
 
         var mirandaHost = sessionStorage.getItem('miranda');
-        var url = "https://" + mirandaHost + "/servlets/updateUser";
+        var url = "https://" + mirandaHost + "/user/update";
 
         $.post(url, json, showUpdateResult);
     }
@@ -343,7 +343,7 @@
         var json = JSON.stringify(user);
 
         var mirandaHost = sessionStorage.getItem('miranda');
-        var url = "https://" + mirandaHost + "/servlets/createUser";
+        var url = "https://" + mirandaHost + "/users/create";
 
         $.post(url, json, newUserResults);
     }
@@ -374,7 +374,7 @@
             var json = JSON.stringify(request);
 
             var mirandaHost = sessionStorage.getItem('miranda');
-            var url = "https://" + mirandaHost + "/servlets/deleteUser";
+            var url = "https://" + mirandaHost + "/user/delete";
 
             $.post(url, json, deleteResult)
         }
@@ -397,7 +397,6 @@
 
     setupSession();
     fillTable();
-
 </script>
 </body>
 </html>

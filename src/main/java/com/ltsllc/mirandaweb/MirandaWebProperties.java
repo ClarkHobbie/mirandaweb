@@ -4,7 +4,6 @@ import com.ltsllc.mirandaweb.util.PropertiesUtils;
 import com.ltsllc.mirandaweb.util.PropertyDelegate;
 import com.ltsllc.mirandaweb.util.Utils;
 
-import javax.xml.bind.annotation.XmlType;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
@@ -16,15 +15,14 @@ import java.util.Properties;
 public class MirandaWebProperties extends PropertyDelegate {
     public static final String BASE_PACKAGE = "com.ltsllc.mirandaweb.";
     public static final String PROPERTY_BASE = BASE_PACKAGE + "base";
-    public static final String PROPERTY_KEYSTORE = BASE_PACKAGE + "keystore";
-    public static final String PROPERTY_PASSWORD = BASE_PACKAGE + "password";
+    public static final String PROPERTY_KEYSTORE_FILENAME = BASE_PACKAGE + "keystore";
     public static final String PROPERTY_PORT = BASE_PACKAGE + "port";
     public static final String PROPERTY_TRUST_STORE_FILENAME = BASE_PACKAGE + "trustStore";
     public static final String PROPERTY_PROPERTIES_FILE = BASE_PACKAGE + "properties";
     public static final String PROPERTY_HTML_BASE = BASE_PACKAGE + "html";
 
     public static final String DEFAULT_BASE = "html";
-    public static final String DEFAULT_KEYSTORE = "keystore";
+    public static final String DEFAULT_KEYSTORE_FILENAME = "keystore";
     public static final String DEFAULT_PORT = "443";
     public static final String DEFAULT_TRUST_STORE_FILENAME = "truststore";
     public static final String DEFAULT_PROPERTIES_FILE = "mirandaweb.properties";
@@ -32,7 +30,7 @@ public class MirandaWebProperties extends PropertyDelegate {
 
     public static final String[][] defaults = {
             { PROPERTY_BASE, DEFAULT_BASE },
-            { PROPERTY_KEYSTORE, DEFAULT_KEYSTORE },
+            { PROPERTY_KEYSTORE_FILENAME, DEFAULT_KEYSTORE_FILENAME},
             { PROPERTY_PORT, DEFAULT_PORT },
             { PROPERTY_TRUST_STORE_FILENAME, DEFAULT_TRUST_STORE_FILENAME },
             { PROPERTY_PROPERTIES_FILE, DEFAULT_PROPERTIES_FILE },

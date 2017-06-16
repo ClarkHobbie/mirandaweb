@@ -1,5 +1,5 @@
     function setupMiranda () {
-        sessionStorage.setItem ('miranda', 'localhost:444');
+        sessionStorage.setItem ('miranda', 'localhost:4000');
     }
 
     setupMiranda();

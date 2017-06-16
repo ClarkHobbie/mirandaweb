@@ -103,18 +103,40 @@ Please enter your credentials
         }
     }
 
+    function performLogin () {
+        var json = '{ "name" : "' + $('#name').val() + '" }';
+
+        var mirandaHost = sessionStorage.getItem('miranda');
+        var url = "https://" + mirandaHost + "/login";
+
+        $.ajax ({
+            url : url,
+            method : 'POST',
+            data : json,
+            headers : { "Access-Control-Allow-Origin" : mirandaHost },
+            success : loginResults
+        });
+    }
+
     function loginResults (data, status) {
         var result = JSON.parse(data);
-        if (result.result == "Success") {
+        if (result.result == "Success" || result.result == "SessionCreated") {
             $('#cipherText').text(result.session);
-            var jsencrypt = new JSEncrypt();
-            jsencrypt.setPrivateKey($('#privateKey').val());
-            var clearText = jsencrypt.decrypt($('#cipherText').val());
-            $('#session').text(clearText);
-            sessionStorage.setItem('session', clearText);
-            sessionStorage.setItem('name', $('#name').val());
-            sessionStorage.setItem('category', result.category);
+            decryptSession(result.session);
+        } else {
+            alert("Error loging in");
         }
     }
+
+    function decryptSession (sessionString) {
+        var jsencrypt = new JSEncrypt();
+        jsencrypt.setPrivateKey($('#privateKey').val());
+        var clearText = jsencrypt.decrypt(sessionString);
+        $('#session').text(clearText);
+        sessionStorage.setItem('session', clearText);
+        sessionStorage.setItem('name', $('#name').val());
+    }
+
+
 
 </script>

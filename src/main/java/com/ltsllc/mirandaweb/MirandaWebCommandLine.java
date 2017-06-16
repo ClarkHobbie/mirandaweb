@@ -9,28 +9,66 @@ import java.util.Properties;
  * Created by Clark on 4/30/2017.
  */
 public class MirandaWebCommandLine extends CommandLine {
-    public static final String USAGE = "mirandaweb [-b <html base>] [-k <keystore>] [-p <password>] [-r <port>]";
+    public static final String USAGE = "mirandaweb [-b <html base>] [-k <key store filename>] [-p <keyStorePassword>] [-r <port>]";
 
     public static final String BASE_SHORT = "-b";
     public static final String BASE_LONG = "--base";
 
-    public static final String KEYSTORE_SHORT = "-k";
-    public static final String KEYSTORE_LONG = "--keystore";
+    public static final String KEY_STORE_FILENAME_SHORT = "-k";
+    public static final String KEY_STORE_FILENAME_LONG = "--keystore";
 
-    public static final String PASSWORD_SHORT = "-p";
-    public static final String PASSWORD_LONG = "--password";
+    public static final String KEY_STORE_PASSWORD_SHORT = "-p";
+    public static final String KEY_STORE_PASSWORD_LONG = "--keyStorePassword";
 
     public static final String PORT_SHORT = "-r";
     public static final String PORT_LONG = "--port";
 
-    public static final String PROPERTIES_FILE_SHORT = "-t";
-    public static final String PROPERTIES_FILE_LONG = "--properties";
+    public static final String PROPERTIES_FILENAME_SHORT = "-s";
+    public static final String PROPERTIES_FILENAME_LONG = "--propertiesFileName";
+
+    public static final String TRUST_STORE_PASSWORD_SHORT = "-t";
+    public static final String TRUST_STORE_PASSWORD_LONG = "--trustStorePassword";
+
+    public static final String TRUST_STORE_FILENAME_SHORT = "-T";
+    public static final String TRUST_STORE_FILENAME_LONG = "--trustStoreFileName";
+
+    public enum Options {
+        Unknown,
+
+        Base,
+        KeyStoreFileName,
+        KeyStorePassword,
+        Port,
+        PropertiesFileName,
+        TrustStorePassword,
+        TrustStoreFileName
+    }
+
 
     private String base;
-    private String keystore;
-    private String password;
+    private String keyStoreFilename;
+    private String keyStorePassword;
     private int port;
     private String propertiesFile;
+    private String trustStorePassword;
+    private String trustStoreFilename;
+
+    public String getTrustStoreFilename() {
+        return trustStoreFilename;
+    }
+
+    public void setTrustStoreFilename(String trustStoreFilename) {
+        this.trustStoreFilename = trustStoreFilename;
+    }
+
+    public String getTrustStorePassword() {
+
+        return trustStorePassword;
+    }
+
+    public void setTrustStorePassword(String trustStorePassword) {
+        this.trustStorePassword = trustStorePassword;
+    }
 
     public String getPropertiesFile() {
         return propertiesFile;
@@ -52,20 +90,20 @@ public class MirandaWebCommandLine extends CommandLine {
         this.port = Integer.parseInt(value);
     }
 
-    public String getPassword() {
-        return password;
+    public String getKeyStorePassword() {
+        return keyStorePassword;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+    public void setKeyStorePassword(String keyStorePassword) {
+        this.keyStorePassword = keyStorePassword;
     }
 
-    public String getKeystore() {
-        return keystore;
+    public String getKeyStoreFilename() {
+        return keyStoreFilename;
     }
 
-    public void setKeystore(String keystore) {
-        this.keystore = keystore;
+    public void setKeyStoreFilename(String filename) {
+        this.keyStoreFilename = filename;
     }
 
     public String getBase() {
@@ -76,82 +114,84 @@ public class MirandaWebCommandLine extends CommandLine {
         this.base = base;
     }
 
+    public Options stringToOptions (String string) {
+        Options option = Options.Unknown;
+
+        if (string.equals(BASE_SHORT) || string.equals(BASE_LONG))
+            option = Options.Base;
+        else if (string.equals(KEY_STORE_FILENAME_SHORT) || string.equals(KEY_STORE_FILENAME_LONG))
+            option = Options.KeyStoreFileName;
+        else if (string.equals(KEY_STORE_PASSWORD_SHORT) || string.equals(KEY_STORE_PASSWORD_LONG))
+            option = Options.KeyStorePassword;
+        else if (string.equals(PORT_SHORT) || string.equals(PORT_LONG))
+            option = Options.Port;
+        else if (string.equals(PROPERTIES_FILENAME_SHORT) || string.equals(PROPERTIES_FILENAME_LONG))
+            option = Options.PropertiesFileName;
+        else if (string.equals(TRUST_STORE_PASSWORD_SHORT) || string.equals(TRUST_STORE_PASSWORD_LONG))
+            option = Options.TrustStorePassword;
+        else if (string.equals(TRUST_STORE_FILENAME_SHORT) || string.equals(TRUST_STORE_FILENAME_LONG))
+            option = Options.TrustStoreFileName;
+
+        return option;
+    }
+
+
     public MirandaWebCommandLine(String[] argv) {
         super(argv);
         setBase(MirandaWebProperties.DEFAULT_BASE);
-        setKeystore(MirandaWebProperties.DEFAULT_KEYSTORE);
+        setKeyStoreFilename(MirandaWebProperties.DEFAULT_KEYSTORE_FILENAME);
         setPort(MirandaWebProperties.DEFAULT_PORT);
         setPropertiesFile(MirandaWebProperties.DEFAULT_PROPERTIES_FILE);
+        setTrustStoreFilename(MirandaWebProperties.DEFAULT_TRUST_STORE_FILENAME);
     }
 
-    public void setBase() {
-        if (getArg() == null) {
-            System.err.println("http base missing argument");
-            System.err.println(USAGE);
-            return;
-        } else {
-            setBase(getArgAndAdvance());
-        }
 
-    }
-
-    public void setKeystore() {
-        if (null == getArg()) {
-            System.err.println("keystore missing argument");
-            System.err.println(USAGE);
-            return;
-        }
-
-        setKeystore(getArgAndAdvance());
-    }
-
-    public void setPassword() {
-        if (null == getArg()) {
-            System.err.println("password missing argument");
-            System.err.println(USAGE);
-            return;
-        }
-
-        setPassword(getArgAndAdvance());
-    }
-
-    public void setPort () {
-        if (null == getArg()) {
-            System.err.println("port missing argument");
-            System.err.println(USAGE);
-            return;
-        }
-
-        setPort(getArgAndAdvance());
-    }
-
-    public void setPropertiesFile () {
-        if (null == getArg()) {
-            System.err.println("missing properties file argument");
-            System.err.println(USAGE);
-            return;
-        }
-
-        setPropertiesFile(getArgAndAdvance());
-    }
 
     public void parse() {
-        while (null != getArg()) {
-            if (getArg().equals(BASE_SHORT) || getArg().equals(BASE_LONG)) {
-                advance();
-                setBase();
-            } else if (getArg().equals(KEYSTORE_SHORT) || (getArg().equals(KEYSTORE_LONG))) {
-                advance();
-                setKeystore();
-            } else if (getArg().equals(PASSWORD_SHORT) || (getArg().equals(PASSWORD_LONG))) {
-                advance();
-                setPassword();
-            } else if (getArg().equals(PORT_SHORT) || (getArg().equals(PORT_LONG))) {
-                advance();
-                setPort();
-            } else if (getArg().equals(PROPERTIES_FILE_SHORT) || (getArg().equals(PROPERTIES_FILE_LONG))) {
-                advance();
-                setPropertiesFile();
+        while (hasMoreArgs()) {
+            String optionString = getArgAndAdvance();
+            Options option = stringToOptions(optionString);
+
+            switch (option) {
+                case Base: {
+                    processBaseOption();
+                    break;
+                }
+
+                case Port: {
+                    processPortOption();
+                    break;
+                }
+
+                case KeyStoreFileName: {
+                    processKeyStoreFilenameOption();
+                    break;
+                }
+
+                case KeyStorePassword: {
+                    processKeyStorePasswordOption();
+                    break;
+                }
+
+                case PropertiesFileName: {
+                    processPropertiesFileNameOption();
+                    break;
+                }
+
+                case TrustStorePassword: {
+                    processTrustStorePasswordOption();
+                    break;
+                }
+
+                case TrustStoreFileName: {
+                    processTrustStoreFileNameOption();
+                    break;
+                }
+
+                default: {
+                    System.err.println ("Unrecognized option: " + getArg());
+                    System.exit(-1);
+                }
             }
         }
     }
@@ -161,14 +201,96 @@ public class MirandaWebCommandLine extends CommandLine {
         Properties properties = new Properties();
 
         properties.setProperty(MirandaWebProperties.PROPERTY_BASE, getBase());
-        properties.setProperty(MirandaWebProperties.PROPERTY_KEYSTORE, getKeystore());
-
-        String temp = getPassword();
-        if (null != temp)
-            properties.setProperty(MirandaWebProperties.PROPERTY_PASSWORD, temp);
-
+        Integer port = new Integer(getPort());
+        properties.setProperty(MirandaWebProperties.PROPERTY_PORT, port.toString());
+        properties.setProperty(MirandaWebProperties.PROPERTY_KEYSTORE_FILENAME, getKeyStoreFilename());
         properties.setProperty(MirandaWebProperties.PROPERTY_PROPERTIES_FILE, getPropertiesFile());
+        properties.setProperty(MirandaWebProperties.PROPERTY_TRUST_STORE_FILENAME, getTrustStoreFilename());
 
         return properties;
+    }
+
+    public void processBaseOption () {
+        String base = getArgAndAdvance();
+
+        if (base == null)
+            printErrorAndExit("Missing base");
+        else {
+            setBase(base);
+        }
+    }
+
+    public void processPortOption () {
+        String portString = getArgAndAdvance();
+
+        if (portString == null) {
+            printErrorAndExit("Missing port");
+        } else {
+            try {
+                int port = Integer.parseInt(portString);
+                setPort(port);
+            } catch (NumberFormatException e) {
+                printErrorAndExit("Invalid port: " + portString);
+            }
+        }
+    }
+
+    public void printErrorAndExit (String error) {
+        System.err.println (error);
+        System.err.println (USAGE);
+
+        System.exit(-1);
+    }
+
+
+    public void processKeyStoreFilenameOption () {
+        String filename = getArgAndAdvance();
+
+        if (filename == null) {
+            printErrorAndExit("Missing properties file name");
+        }
+
+        setKeyStoreFilename(filename);
+    }
+
+    public void processKeyStorePasswordOption () {
+        String password = getArgAndAdvance();
+
+        if (null == password) {
+            printErrorAndExit("Missing keystore password");
+        }
+
+        setKeyStorePassword(password);
+    }
+
+
+    public void processPropertiesFileNameOption () {
+        String filename = getArgAndAdvance();
+
+        if (null == filename) {
+            printErrorAndExit("Missing properties filename");
+        }
+
+        setPropertiesFile(filename);
+    }
+
+    public void processTrustStorePasswordOption () {
+        String password = getArgAndAdvance();
+
+        if (null == password) {
+            printErrorAndExit("Missing trust store password");
+        }
+
+        setTrustStorePassword(password);
+    }
+
+    public void processTrustStoreFileNameOption () {
+        String filename = getArgAndAdvance();
+
+        if (null == filename) {
+            printErrorAndExit("Missing trust store filename");
+        }
+
+        setTrustStoreFilename(filename);
     }
 }
