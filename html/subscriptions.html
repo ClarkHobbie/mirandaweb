@@ -77,10 +77,10 @@
                         <input id="livelinessUrl" type="text" class="input-medium"/>
                     </div>
                     <div class="control-group">
-                        <label class="control-label">Remote Policy</label>
-                        <label><input id="node" type="radio" name="remotePolicy">None</label>
-                        <label><input id="received" type="radio" name="remotePolicy">Received</label>
-                        <label><input id="written" type="radio" name="remotePolicy">Written</label>
+                        <label class="control-label">Error Policy</label>
+                        <label><input id="drop" type="radio" name="errorPolicy">Drop</label>
+                        <label><input id="retry" type="radio" name="errorPolicy">Retry</label>
+                        <label><input id="deadLetter" type="radio" name="errorPolicy">Dead Letter</label>
                     </div>
                 </div>
             </div>
@@ -112,7 +112,7 @@
         var json = JSON.stringify(getSubscriptionsRequest);
 
         var mirandaHost = sessionStorage.getItem ('miranda');
-        var url = "https://" + mirandaHost + "/servlets/getSubscriptions";
+        var url = "https://" + mirandaHost + "/subscriptions/list";
 
         $.ajax ({
             url : url,
@@ -131,7 +131,7 @@
 
             $('#tableBody').empty();
 
-            response.subscriptions.forEach( function(subscription) {
+            response.list.forEach( function(subscription) {
                 html = html + "<tr>";
                 html = html + "<td>" + subscription.name + "</td>";
                 html = html + "</tr>";
@@ -164,11 +164,11 @@
         var json = JSON.stringify(getSubscriptionRequest);
 
         var mirandaHost = sessionStorage.getItem ('miranda');
-        var url = "https://" + mirandaHost + "/servlets/getSubscription";
+        var url = "https://" + mirandaHost + "/subscriptions/read";
 
         $.ajax ({
             url : url,
-            success : getSubscriptionResult,
+            success : readSubscriptionResults,
             method : 'POST',
             data : json,
             headers : { "Access-Control-Allow-Origin" : mirandaHost }
@@ -192,7 +192,7 @@
          var json = JSON.stringify(deleteRequest);
 
          var mirandaHost = sessionStorage.getItem ('miranda');
-         var url = "https://" + mirandaHost + "/servlets/deleteSubscription";
+         var url = "https://" + mirandaHost + "/subscriptions/delete";
 
          $.ajax ({
              url : url,
@@ -220,7 +220,8 @@
 
         var json = JSON.stringify(updateRequest);
 
-        $.post("/servlets/updateSubscription", json, sendUpdateResponse);
+        var url = "https://" + sessionStorage.getItem('miranda') + "/subscriptions/update";
+        $.post(url, json, sendUpdateResponse);
     }
 
     function sendUpdateResponse (data, status) {
@@ -241,7 +242,7 @@
         subscription.dataUrl = $('#url').val();
         subscription.livelinessUrl = $('#livelinessUrl').val();
 
-        subscription.remotePolicy = getRemotePolicy();
+        subscription.errorPolicy = getErrorPolicy();
 
         return subscription;
     }
@@ -259,36 +260,40 @@
         $('#url').val(subscription.dataUrl);
         $('#livelinessUrl').val (subscription.livelinessUrl);
 
-        setRemotePolicy(subscription.remotePolicy);
+        setErrorPolicy(subscription.errorPolicy);
     }
 
-    function setRemotePolicy (remotePolicy) {
-        $('#none').prop("checked", false);
-        $('#received').prop("checked", false);
-        $('#written').prop("checked", false);
+    function setErrorPolicy (errorPolicy) {
+        $('#drop').prop("checked", false);
+        $('#retry').prop("checked", false);
+        $('#deadLetter').prop("checked", false);
 
-        if (remotePolicy == "None")
-            $('#none').prop("checked", true);
-        else if (remotePolicy == "AcknowledgeReceipt")
-            $('#received').prop("checked", true);
-        else if (remotePolicy == "Written")
-            $('#written').prop("checked", true);
+        if (errorPolicy == "Drop")
+            $('#drop').prop("checked", true);
+        else if (errorPolicy == "Retry")
+            $('#retry').prop("checked", true);
+        else if (errorPolicy == "DeadLetter")
+            $('#deadLetter').prop("checked", true);
+        else if (errorPolicy == null) {
+        } else {
+            alert ("Unrecognized error policy: " + errorPolicy);
+        }
     }
 
-    function getRemotePolicy () {
-        if ($('#none').prop("checked"))
-           return "None";
-        else if ($('#received').prop("checked"))
-            return "AcknowledgeReceipt";
-        else if ($('#written').prop("checked"))
-            return "Written";
+    function getErrorPolicy () {
+        if ($('#drop').prop("checked"))
+           return "Drop";
+        else if ($('#retry').prop("checked"))
+            return "Retry";
+        else if ($('#deadLetter').prop("checked"))
+            return "DeadLetter";
         else {
-            alert ("Please select a remote policy");
+            alert ("Please select an error policy");
             return "Unknown";
         }
     }
 
-    function getSubscriptionResult (data, status) {
+    function readSubscriptionResults (data, status) {
         var result = JSON.parse(data);
 
         if (result.result != "Success") {
@@ -298,9 +303,11 @@
 
         $('#dialogTitle').text("Update Subscription");
 
-        setSubscription(result.subscription);
+        setSubscription(result.object);
 
-        sowDelete(function () { deleteSubscription(); });
+        $('#delete').show();
+        $('#delete').unbind();
+        $('#delete').click (function () { deleteSubscription(); });
 
         $('#accept').text("Update");
         $('#accept').unbind();
@@ -313,11 +320,13 @@
         $('#dialogTitle').text("New Subscription");
 
         $('#name').val("");
+        var userName = sessionStorage.getItem('name');
+        $('#owner').val(userName);
         $('#topic').val("");
         $('#url').val("");
         $('#livelinessUrl').val("");
 
-        setRemotePolicy("unknown");
+        setErrorPolicy(null);
 
         $('#accept').text ("Create");
         $('#accept').unbind();
@@ -339,14 +348,13 @@
         subscription.dataUrl = $('#url').val();
         subscription.livelinessUrl = $('#livelinessUrl').val();
 
-        subscription.remotePolicy = getRemotePolicy();
 
         createSubscriptionRequest.subscription = subscription;
 
         var json = JSON.stringify(createSubscriptionRequest);
 
         var mirandaHost = sessionStorage.getItem ('miranda');
-        var url = "https://" + mirandaHost + "/servlets/createSubscription";
+        var url = "https://" + mirandaHost + "/subscriptions/create";
 
         $.ajax ({
             url : url,
@@ -401,7 +409,6 @@
         $('#delete').unbind();
         $('#delete').click(func);
     }
-
 
     setupSession();
     fillTable();

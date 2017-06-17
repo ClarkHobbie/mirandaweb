@@ -76,8 +76,8 @@
         </div>
 
         <div class="modal-footer">
-            <button id="delete" type="button" class="btn btn-default" data-dismiss="modal" hidden="true">Delete</button>
-            <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+            <button id="delete" type="button" class="btn btn-default" data-dismiss="modal">Delete</button>
+            <button id="cancel" type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
             <button id="accept" type="button" class="btn btn-primary" data-dismiss="modal">Create</button>
         </div>
     </div> <!-- modal-dialog -->
@@ -94,7 +94,7 @@
         var json = JSON.stringify(getTopicsRequest);
 
         var mirandaHost = sessionStorage.getItem ('miranda');
-        var url = "https://" + mirandaHost + "/servlets/getTopics";
+        var url = "https://" + mirandaHost + "/topics/list";
 
         $.ajax ({
             url : url,
@@ -113,7 +113,7 @@
             var html = "";
             $('#tableBody').empty();
 
-            result.topicList.forEach(function(element) {
+            result.list.forEach(function(element) {
                 html = html + "<tr>";
                 html = html + "<td>" + element.name + "</td>";
                 html = html + "</tr>";
@@ -140,12 +140,13 @@
         $('#received').prop("checked", false);
         $('#written').prop("checked", false);
 
-        $('#delete').prop("hidden", true);
+        $('#delete').prop("style", "display: none");
 
         $('#accept').text("Create");
         $('#accept').unbind();
         $('#accept').click (function () { sendCreateTopic(); });
 
+        $('#delete').hide();
         showDialog();
     }
 
@@ -171,7 +172,7 @@
         var json = JSON.stringify(topicRequest);
 
         var mirandaHost = sessionStorage.getItem ('miranda');
-        var url = "https://" + mirandaHost + "/servlets/getTopics";
+        var url = "https://" + mirandaHost + "/topics/create";
 
         $.ajax({
             url : url,
@@ -209,7 +210,7 @@
         var json = JSON.stringify(editRequest);
 
         var mirandaHost = sessionStorage.getItem ('miranda');
-        var url = "https://" + mirandaHost + "/servlets/getTopic";
+        var url = "https://" + mirandaHost + "/topics/read";
 
         $.ajax ({
             url : url,
@@ -230,28 +231,27 @@
 
         $('#title').text("Edit Topic");
 
-        $('#name').val(result.topic.name);
+        $('#name').val(result.object.name);
         $('#name').prop("readonly", true);
 
-        $('#owner').val(result.topic.owner);
+        $('#owner').val(result.object.owner);
 
-        if (result.topic.remotePolicy == "None")
+        if (result.object.remotePolicy == "None")
             $('#none').prop("checked", true);
-        else if (result.topic.remotePolicy == "Acknowledged")
+        else if (result.object.remotePolicy == "Acknowledged")
             $('#received').prop("checked", true);
-        else if (result.topic.remotePolicy == "Written")
+        else if (result.object.remotePolicy == "Written")
             $('#written').prop("checked", true);
         else {
-            alert ("Unrecognized remote policy " + result.topic.remotePolicy);
+            alert ("Unrecognized remote policy " + result.object.remotePolicy);
         }
-        $('#delete').prop("hidden", false);
 
         $('#accept').text("Update");
         $('#accept').unbind();
         $('#accept').click( function () { sendUpdateTopic(); });
 
+        $('#delete').show();
         $('#delete').unbind();
-        $('#delete').prop("hidden", false);
         $('#delete').click( function () { deleteTopic(); });
 
         showDialog();
@@ -265,7 +265,7 @@
         if ($('#none').prop("checked")) {
             topic.remotePolicy = "None";
         } else if ($('#received').prop("checked")) {
-            topic.remotePolicy = "AcknowledgeReceipt";
+            topic.remotePolicy = "Acknowledged";
         } else if ($('#written').prop("checked")) {
             topic.remotePolicy = "Written";
         } else {
@@ -279,7 +279,7 @@
         var json = JSON.stringify(updateRequest);
 
         var mirandaHost = sessionStorage.getItem ('miranda');
-        var url = "https://" + mirandaHost + "/servlets/updateTopic";
+        var url = "https://" + mirandaHost + "/topics/update";
 
         $.ajax ({
             url : url,
@@ -311,7 +311,7 @@
         var json = JSON.stringify(deleteRequest);
 
         var mirandaHost = sessionStorage.getItem ('miranda');
-        var url = "https://" + mirandaHost + "/servlets/updateTopic";
+        var url = "https://" + mirandaHost + "/topics/delete";
 
         $.ajax ({
             url : url,
@@ -327,6 +327,8 @@
 
         if (result.result != "Success")
             alert ("Delete failed " + result.result);
+
+        fillTable();
     }
 
 
