@@ -120,7 +120,7 @@
         getUsersRequestObject.sessionIdString = $('#session').val();
         var json = JSON.stringify (getUsersRequestObject);
         var mirandaHost = sessionStorage.getItem('miranda');
-        var url = "https://" + mirandaHost + "/user/list";
+        var url = "https://" + mirandaHost + "/users/list";
 
         $.ajax ({
             url : url,
@@ -143,7 +143,7 @@
             var html = "";
             $('#tableBody').empty();
 
-            result.userList.forEach(function(element) {
+            result.list.forEach(function(element) {
                 html = html + "<tr>";
                 html = html + "<td>" + element.name + "</td>";
                 html = html + "</tr>";
@@ -199,7 +199,7 @@
 
         var request = new Object();
         request.sessionIdString = $('#session').val();
-        request.userObject = user;
+        request.user = user;
 
         var data = JSON.stringify(request);
 
@@ -252,13 +252,13 @@
         var row = $(table).find("tr:nth-child(" + anIndex + ")");
         var request = new Object();
         request.sessionIdString = $('#session').val();
-        request.userObject = new Object();
-        request.userObject.name = $(row).find("td:nth-child(1)").text();
+        request.user = new Object();
+        request.user.name = $(row).find("td:nth-child(1)").text();
 
         var  json = JSON.stringify(request);
 
         var mirandaHost = sessionStorage.getItem('miranda');
-        var url = "https://" + mirandaHost + "/user/read";
+        var url = "https://" + mirandaHost + "/users/read";
 
         $.post(url, json, commenceEdit);
     }
@@ -269,7 +269,7 @@
         if (result.result != "Success") {
             alert ("Failed to get user " + result.result);
         } else {
-            edit(result.userObject);
+            edit(result.object);
         }
     }
 
@@ -287,7 +287,7 @@
         else if (user.category == "Admin")
             $('#admin').prop("checked", true);
         else {
-            alert ("Unrecognized category " + userObject.category);
+            alert ("Unrecognized category " + user.category);
         }
 
         $('#description').val(user.description);
@@ -315,12 +315,12 @@
         user.description = $('#description').val();
         user.publicKeyPem = $('#publicKey').val();
 
-        updateUserRequest.userObject = user;
+        updateUserRequest.user = user;
 
         var json = JSON.stringify(updateUserRequest);
 
         var mirandaHost = sessionStorage.getItem('miranda');
-        var url = "https://" + mirandaHost + "/user/update";
+        var url = "https://" + mirandaHost + "/users/update";
 
         $.post(url, json, showUpdateResult);
     }
@@ -369,12 +369,12 @@
             var user = new Object();
             user.name = name;
             var request = new Object();
-            request.userObject = user;
+            request.user = user;
             request.sessionIdString = $('#session').val();
             var json = JSON.stringify(request);
 
             var mirandaHost = sessionStorage.getItem('miranda');
-            var url = "https://" + mirandaHost + "/user/delete";
+            var url = "https://" + mirandaHost + "/users/delete";
 
             $.post(url, json, deleteResult)
         }
