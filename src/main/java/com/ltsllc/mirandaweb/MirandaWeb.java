@@ -3,15 +3,20 @@ package com.ltsllc.mirandaweb;
 import com.ltsllc.mirandaweb.property.UndefinedPropertyException;
 import com.ltsllc.mirandaweb.util.PropertiesUtils;
 import com.ltsllc.mirandaweb.util.Utils;
+import org.bouncycastle.openssl.PEMWriter;
+import org.bouncycastle.util.io.pem.PemWriter;
 import org.eclipse.jetty.server.*;
 import org.eclipse.jetty.server.handler.HandlerCollection;
 import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
+import java.security.cert.Certificate;
 import java.util.Properties;
 import java.util.Scanner;
 
@@ -27,8 +32,26 @@ public class MirandaWeb {
     private MirandaWebCommandLine commandLine;
     private Server server;
     private MirandaWebProperties properties;
+    private String keyStoreFilename;
     private String keyStorePassword;
+    private KeyStore keyStore;
     private String trustStorePasswod;
+
+    public KeyStore getKeyStore() {
+        return keyStore;
+    }
+
+    public void setKeyStore(KeyStore keyStore) {
+        this.keyStore = keyStore;
+    }
+
+    public String getKeyStoreFilename() {
+        return keyStoreFilename;
+    }
+
+    public void setKeyStoreFilename(String keyStoreFilename) {
+        this.keyStoreFilename = keyStoreFilename;
+    }
 
     public String getKeyStorePassword() {
         return keyStorePassword;
@@ -70,6 +93,7 @@ public class MirandaWeb {
         MirandaWebCommandLine commandLine = new MirandaWebCommandLine(argv);
         commandLine.parse();
         MirandaWeb mirandaWeb = new MirandaWeb(commandLine);
+        mirandaWeb.setKeyStoreFilename("keystore");
         mirandaWeb.start();
     }
 
@@ -106,7 +130,9 @@ public class MirandaWeb {
 
     public void start () throws Exception {
         setupPasswords();
+        setupKeyStore();
         setupProperties();
+        exportCertificate();
 
         Server server = buildJetty();
         server.start();
@@ -193,5 +219,32 @@ public class MirandaWeb {
 
     public String getPropertiesFileName () {
         return "mirandaweb.properties";
+    }
+
+    public void exportCertificate () throws GeneralSecurityException, IOException {
+        Certificate certificate = getKeyStore().getCertificate("ca");
+        FileWriter fileWriter = null;
+        try {
+            fileWriter = new FileWriter("tempfile");
+            PEMWriter pemWriter = new PEMWriter(fileWriter);
+            pemWriter.writeObject(certificate);
+            pemWriter.close();
+        } finally {
+            Utils.closeIgnoreExceptions(fileWriter);
+        }
+    }
+
+    public void setupKeyStore () throws GeneralSecurityException, IOException {
+        KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
+
+        FileInputStream fileInputStream = null;
+        try {
+            fileInputStream = new FileInputStream(getKeyStoreFilename());
+            keyStore.load(fileInputStream, getKeyStorePassword().toCharArray());
+            setKeyStore(keyStore);
+            fileInputStream.close();
+        } finally {
+            Utils.closeIgnoreExceptions(fileInputStream);
+        }
     }
 }

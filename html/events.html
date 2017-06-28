@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Events</title>
     <link href="/bootstrap/css/bootstrap.css" rel="stylesheet">
+    <link href="/css/jquery.datetimepicker.css" rel="sylesheet">
 </head>
 <body>
 
@@ -28,7 +29,57 @@
     </div><!--/.container-fluid -->
 </nav>
 
+<h3>Search for an Event</h3>
+<div class="control-group">
+    <input id="guid" type="text" class="input-medium"/>(GUID)
+    <br/>
+    <input id="search-author" type="text" class="input-medium"/>(author)
+    <br/>
+    <input id="datetime" type="text" class="input-medium"/>(date/time that event occurred)
+    <br/>
+    <input id="topic" type="text" class="input-medium"/>(topic that the event occurred in)
+</div>
+<h3>Create an Event</h3>
+<div class="form-horizontal">
+<div class="control-group">
+    <label class="control-label">author</label>
+    <input id="create-author" type="text" class="input-medium"/>
+</div>
+</div>
+
+<div class="form-horizontal">
+<div class="control-group">
+    <label class="control-label">topic</label>
+    <input id="create-topic" type="text" class="input-medium"/>
+</div>
+</div>
+
+<div class="form-horizontal">
+<div class="control-group">
+    <label class="control-label">type</label>
+    <input id="create-type" type="text" class="input-medium"/>
+</div>
+</div>
+
+<div class="form-horizontal">
+<div class="control-group">
+    <label class="control-label">content</label>
+    <textarea class="form-control">
+    </textarea>
+</div>
+</div>
+
 <script src="/js/jquery.js"></script>
 <script src="/bootstrap/js/bootstrap.js"></script>
+<script src="/js/setupMiranda.js"></script>
+<script src="/js/jquery.datetimepicker.js"></script>
+<script>
+    function start() {
+        jQuery('#datetime').datetimepicker({
+            format:'d.m.Y H:i',
+            lang:'en'
+        });
+    }
+</script>
 </body>
 </html>
